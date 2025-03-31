@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>メンテナンス中</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Klee+One&display=swap');
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+            text-align: center;
+            font-family: 'Klee One', cursive;
+            background: linear-gradient(to right, #2c3e50, #4ca1af);
+            color: white;
+        }
+        .logo {
+            width: 200px;
+            margin-bottom: 20px;
+        }
+        .progress {
+            width: 80%;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        .progress-bar {
+            height: 30px;
+            width: 0%; /* 初期値 */
+            background-color: #4CAF50;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+        }
+        a {
+            color: #FFD700;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+    <script>
+        fetch('maintenance.json')
+            .then(response => response.json())
+            .then(maintenanceData => {
+                if (maintenanceData.type === "緊急") {
+                    window.location.href = "emergency.html";
+                }
+
+                document.getElementById("maintenance-type").innerHTML = `メンテナンスの種類: <strong>${maintenanceData.type}</strong>`;
+                document.getElementById("maintenance-reason").innerHTML = `理由: <strong>${maintenanceData.reason}</strong>`;
+                document.getElementById("responsible").innerText = maintenanceData.responsible;
+                document.getElementById("start-time").innerText = maintenanceData.startTime;
+                document.getElementById("end-time").innerText = maintenanceData.endTime;
+                document.getElementById("progress-bar").style.width = maintenanceData.progress + "%";
+                document.getElementById("progress-bar").innerText = maintenanceData.progress + "%";
+                
+                const snsList = document.getElementById("sns-links");
+                maintenanceData.sns.forEach(sns => {
+                    const li = document.createElement("li");
+                    const a = document.createElement("a");
+                    a.href = sns.url;
+                    a.innerText = sns.name;
+                    li.appendChild(a);
+                    snsList.appendChild(li);
+                });
+            })
+            .catch(error => console.error('JSONの読み込みに失敗:', error));
+    </script>
+</head>
+<body>
+    <img src="https://cdn.creators-group.net/img/Logo_Creators_Lounge_R7_4-1.jpeg" alt="ロゴ" class="logo">
+    <h1>現在メンテナンス中です</h1>
+    <p id="maintenance-type">メンテナンスの種類: <strong></strong></p>
+    <p id="maintenance-reason">理由: <strong></strong></p>
+    <p>担当者: <strong id="responsible"></strong></p>
+    <p>開始時刻: <span id="start-time"></span></p>
+    <p>終了予定時刻: <span id="end-time"></span></p>
+    
+    <div class="progress">
+        <div class="progress-bar" id="progress-bar">0%</div>
+    </div>
+    
+    <p>最新情報はSNSでチェック！</p>
+    <ul id="sns-links"></ul>
+</body>
+</html>
