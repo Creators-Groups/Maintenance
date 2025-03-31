@@ -31,7 +31,7 @@
         }
         .progress-bar {
             height: 30px;
-            width: 0%; /* 初期値 */
+            width: 0%;
             background-color: #4CAF50;
             text-align: center;
             line-height: 30px;
@@ -47,11 +47,17 @@
         }
     </style>
     <script>
-        fetch('maintenance.json')
-            .then(response => response.json())
-            .then(maintenanceData => {
+        async function loadMaintenanceData() {
+            try {
+                const response = await fetch('maintenance.json', { cache: 'no-cache' });
+                if (!response.ok) {
+                    throw new Error(`HTTPエラー: ${response.status}`);
+                }
+                const maintenanceData = await response.json();
+
                 if (maintenanceData.type === "緊急") {
                     window.location.href = "emergency.html";
+                    return;
                 }
 
                 document.getElementById("maintenance-type").innerHTML = `メンテナンスの種類: <strong>${maintenanceData.type}</strong>`;
@@ -59,20 +65,33 @@
                 document.getElementById("responsible").innerText = maintenanceData.responsible;
                 document.getElementById("start-time").innerText = maintenanceData.startTime;
                 document.getElementById("end-time").innerText = maintenanceData.endTime;
-                document.getElementById("progress-bar").style.width = maintenanceData.progress + "%";
-                document.getElementById("progress-bar").innerText = maintenanceData.progress + "%";
-                
+
+                const progressList = document.getElementById("progress-list");
+                progressList.innerHTML = "";
+                maintenanceData.progress.forEach(progressItem => {
+                    const li = document.createElement("li");
+                    li.innerHTML = `<strong>${progressItem.time}</strong> - ${progressItem.status}`;
+                    progressList.appendChild(li);
+                });
+
                 const snsList = document.getElementById("sns-links");
+                snsList.innerHTML = "";
                 maintenanceData.sns.forEach(sns => {
                     const li = document.createElement("li");
                     const a = document.createElement("a");
                     a.href = sns.url;
                     a.innerText = sns.name;
+                    a.target = "_blank";
+                    a.rel = "noopener noreferrer";
                     li.appendChild(a);
                     snsList.appendChild(li);
                 });
-            })
-            .catch(error => console.error('JSONの読み込みに失敗:', error));
+            } catch (error) {
+                console.error('JSONの読み込みに失敗:', error);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", loadMaintenanceData);
     </script>
 </head>
 <body>
@@ -83,12 +102,11 @@
     <p>担当者: <strong id="responsible"></strong></p>
     <p>開始時刻: <span id="start-time"></span></p>
     <p>終了予定時刻: <span id="end-time"></span></p>
-    
-    <div class="progress">
-        <div class="progress-bar" id="progress-bar">0%</div>
-    </div>
+    <h2>進捗状況</h2>
+    <ul id="progress-list"></ul>
     
     <p>最新情報はSNSでチェック！</p>
     <ul id="sns-links"></ul>
+
 </body>
 </html>
