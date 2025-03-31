@@ -166,8 +166,19 @@
                 
                 progressData.forEach((step, index) => {
                     setTimeout(() => {
-                        progressBar.style.width = `${(index + 1) * (100 / progressData.length)}%`;
+                        const progressPercentage = (index + 1) * (100 / progressData.length);
+                        progressBar.style.width = `${progressPercentage}%`;
                         progressBar.innerHTML = `${step.status}`;
+
+                        // メンテナンスメッセージの更新
+                        const maintenanceMessage = document.getElementById("maintenance-message");
+                        if (progressPercentage >= 50 && progressPercentage < 90) {
+                            maintenanceMessage.innerText = "メンテナンスが50%完了しました。もう少しです！";
+                        } else if (progressPercentage >= 90 && progressPercentage < 100) {
+                            maintenanceMessage.innerText = "メンテナンスが90%完了しました。あと少しお待ちください！";
+                        } else if (progressPercentage >= 100) {
+                            maintenanceMessage.innerText = "メンテナンスが完了しました！";
+                        }
                     }, index * 2000); // Adjust the timing for each progress step
                 });
             } catch (error) {
@@ -181,7 +192,7 @@
 <body>
     <br><br><br><br>
     <img src="https://cdn.creators-group.net/img/Logo_Creators_Lounge_R7_4-1.jpeg" alt="ロゴ" class="logo">
-    <h1>現在メンテナンス中です</h1>
+    <h1 id="maintenance-message">現在メンテナンス中です</h1>
     <p id="maintenance-type">メンテナンスの種類: <strong></strong></p>
     <p id="maintenance-reason">理由: <strong></strong></p>
     <p>担当者: <strong id="responsible"></strong></p>
