@@ -17,18 +17,49 @@
             font-family: 'Klee One', cursive;
             background: linear-gradient(to right, #2c3e50, #4ca1af);
             color: white;
+            overflow: hidden;
+            animation: backgroundAnimation 10s infinite alternate;
         }
+
+        @keyframes backgroundAnimation {
+            0% {
+                background: linear-gradient(to right, #2c3e50, #4ca1af);
+            }
+            50% {
+                background: linear-gradient(to right, #4ca1af, #2c3e50);
+            }
+            100% {
+                background: linear-gradient(to right, #2c3e50, #4ca1af);
+            }
+        }
+
         .logo {
             width: 200px;
             margin-bottom: 20px;
+            animation: logoBounce 1.5s infinite alternate;
         }
+
+        @keyframes logoBounce {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.1);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+
         .progress {
             width: 80%;
             background-color: rgba(255, 255, 255, 0.2);
             border-radius: 10px;
             overflow: hidden;
             margin-top: 20px;
+            position: relative;
         }
+
         .progress-bar {
             height: 30px;
             width: 0%;
@@ -36,15 +67,56 @@
             text-align: center;
             line-height: 30px;
             color: white;
+            animation: progressBarAnimation 2s ease-in-out;
         }
+
+        @keyframes progressBarAnimation {
+            0% {
+                width: 0%;
+                background-color: #4CAF50;
+            }
+            100% {
+                width: 100%;
+                background-color: #FF6347;
+            }
+        }
+
         a {
             color: #FFD700;
             text-decoration: none;
             font-weight: bold;
         }
+
         a:hover {
             text-decoration: underline;
         }
+
+        ul {
+            padding-left: 0;
+            list-style-type: none;
+        }
+
+        ul li {
+            padding: 5px;
+            font-size: 1.2em;
+        }
+
+        .progress-status {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin: 10px 0;
+            animation: fadeIn 2s;
+        }
+
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+
     </style>
     <script>
         async function loadMaintenanceData() {
@@ -70,6 +142,7 @@
                 progressList.innerHTML = "";
                 maintenanceData.progress.forEach(progressItem => {
                     const li = document.createElement("li");
+                    li.classList.add("progress-status");
                     li.innerHTML = `<strong>${progressItem.time}</strong> - ${progressItem.status}`;
                     progressList.appendChild(li);
                 });
@@ -86,6 +159,17 @@
                     li.appendChild(a);
                     snsList.appendChild(li);
                 });
+                
+                let progressBar = document.querySelector('.progress-bar');
+                let progressData = maintenanceData.progress;
+                let totalProgress = 0;
+                
+                progressData.forEach((step, index) => {
+                    setTimeout(() => {
+                        progressBar.style.width = `${(index + 1) * (100 / progressData.length)}%`;
+                        progressBar.innerHTML = `${step.status}`;
+                    }, index * 2000); // Adjust the timing for each progress step
+                });
             } catch (error) {
                 console.error('JSONの読み込みに失敗:', error);
             }
@@ -95,14 +179,14 @@
     </script>
 </head>
 <body>
-    <br><br>
     <img src="https://cdn.creators-group.net/img/Logo_Creators_Lounge_R7_4-1.jpeg" alt="ロゴ" class="logo">
-    <h2>現在メンテナンス中です</h2>
+    <h1>現在メンテナンス中です</h1>
     <p id="maintenance-type">メンテナンスの種類: <strong></strong></p>
     <p id="maintenance-reason">理由: <strong></strong></p>
     <p>担当者: <strong id="responsible"></strong></p>
     <p>開始時刻: <span id="start-time"></span></p>
     <p>終了予定時刻: <span id="end-time"></span></p>
+
     <h2>進捗状況</h2>
     <ul id="progress-list"></ul>
     
